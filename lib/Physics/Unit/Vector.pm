@@ -1,11 +1,11 @@
 package Physics::Unit::Vector;
+
 use strict;
-#use warnings;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.01';
+$VERSION = '0.02';
 use Physics::Unit::Scalar;
-#use Physics::Unit ':ALL';
+
 
 my %vec_type = (
     'Physics::Unit::Distance' => 'Displacement',
@@ -79,30 +79,6 @@ sub new {
         $self->{magnitude} = $mag;
         $self->{direction} = [ map $_ / $mag, @scalar ];
 
-# Depreciated code?
-#        $class = $proto;
-#        # The first argument will tell us what type of vector this is
-#        my $s = shift;
-#        my $stype = ref $s;
-#        $s = Physics::Unit::Scalar->new($s) unless $stype;
-#        my @scalar = ($s);
-#        my $class = $vec_type{$stype};
-#        croak "Can't make a vector out of $stype." unless $class;
-#        # Now do the next two arguments
-#        for my $s2 (@_) {
-#            $s2 = Physics::Unit::Scalar->new($s2) unless ref $s2;
-#            my $this_stype = ref $s2;
-#            croak "Can't create inhomogenous vectors." if $this_stype ne $stype;
-#            push @scalar, $s2;
-#        }
-#        # Now normalize
-#        my $mag = (
-#            $scalar[0]->value ** 2 +
-#            $scalar[1]->value ** 2 +
-#            $scalar[2]->value ** 2
-#        ) ** 0.5;
-#        $self->{magnitude} = $mag;
-#        $self->{direction} = [ map { $_ / $mag } @scalar ];
     }
 
     bless $self, $class;
@@ -132,7 +108,7 @@ given Scalars of the same type, $sx, $sy, and $sz:
 
 =head1 AUTHOR
 
-Chris Maloney <Dude@ChrisMaloney.com>
+Chris Maloney <Dude@chrismaloney.com>
 
 =head1 COPYRIGHT AND LICENSE
 

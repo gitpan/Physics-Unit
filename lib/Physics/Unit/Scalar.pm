@@ -1,10 +1,9 @@
 package Physics::Unit::Scalar;
 
 use strict;
-#use warnings;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.01';
+$VERSION = '0.02';
 use Physics::Unit ':ALL';
 
 # This is the actual content of a user defined unit.
@@ -108,7 +107,7 @@ sub convert {
 
     my $u = GetUnit(shift);
 
-    croak 'convert called with invalid parameters' 
+    croak 'convert called with invalid parameters'
         if !ref $self || !ref $u;
 
     return $self->value * $self->MyUnit->convert($u);
@@ -125,7 +124,7 @@ sub add {
 
     my $other = GetScalar(shift);
 
-    croak 'Invalid arguments to Physics::Unit::Scalar::add' 
+    croak 'Invalid arguments to Physics::Unit::Scalar::add'
         if !ref $self || !ref $other;
     carp "Scalar types don't match in add()"
         if ref $self ne ref $other;
@@ -307,45 +306,45 @@ Physics::Unit::Scalar
 =head1 DESCRIPTION
 
 This package encapsulates information about physical quantities.
-Each instance of a class that derives from Physics::Unit::Scalar 
-holds the value of some type of measurable quantity.  When you use 
-this module, several new classes are immediately available.  See the 
-Derived Classes section below for a complete list. 
+Each instance of a class that derives from Physics::Unit::Scalar
+holds the value of some type of measurable quantity.  When you use
+this module, several new classes are immediately available.  See the
+Derived Classes section below for a complete list.
 
-You will probably only need to use these classes that derive from 
-Physics::Unit::Scalar, such as Physics::Unit::Distance, 
-Physics::Unit::Speed, etc.  Of course, you are also free to define 
-your own derived classes, based on types of physical quantities. 
+You will probably only need to use these classes that derive from
+Physics::Unit::Scalar, such as Physics::Unit::Distance,
+Physics::Unit::Speed, etc.  Of course, you are also free to define
+your own derived classes, based on types of physical quantities.
 
-This module relies heavily on the Physics::Unit module.  Each Scalar 
-object has a Unit object that defines the dimensionality of the 
-Scalar. The dimensionality also defines (more or less) the type of 
-physical quantity that is stored.  The type of physical quantity 
-(that is, the type of the Unit object) corresponds to the derived 
-class to which the object belongs. 
+This module relies heavily on the Physics::Unit module.  Each Scalar
+object has a Unit object that defines the dimensionality of the
+Scalar. The dimensionality also defines (more or less) the type of
+physical quantity that is stored.  The type of physical quantity
+(that is, the type of the Unit object) corresponds to the derived
+class to which the object belongs.
 
-For example, the class Physics::Unit::Distance uses the Physics::Unit 
-object named 'meter' to define the scale of its object instances.  
+For example, the class Physics::Unit::Distance uses the Physics::Unit
+object named 'meter' to define the scale of its object instances.
 Coincidentally (not really) the type of the Unit object is 'Distance'.
 
-Defining classes that correspond to physical quantity types allows us 
-to overload the arithmetic methods to produce derived classes of the 
+Defining classes that correspond to physical quantity types allows us
+to overload the arithmetic methods to produce derived classes of the
 correct type automagically.
 
-In general, when a new Physics::Unit::Scalar needs to be created as 
-the result of some operation, this package attempts determine its 
-subclass based on its dimensionality.  Thus, when you multiply two 
-Distances together, the result is an Area object.  This behavior can 
-be selectively overridden when necessary. 
+In general, when a new Physics::Unit::Scalar needs to be created as
+the result of some operation, this package attempts to determine its
+subclass based on its dimensionality.  Thus, when you multiply two
+Distances together, the result is an Area object.  This behavior can
+be selectively overridden when necessary.
 
-The class was designed this way in order to minimize the programmer's 
-need to keep track of the various physical types of the objects in 
-use, and to enable the compiler, in many cases, to verify 
-computations on the basis of dimensional analysis.  Yet, there needs 
-to be mechanisms to overide the default behavior in many cases.  For 
+The class was designed this way in order to minimize the programmer's
+need to keep track of the various physical types of the objects in
+use, and to enable the compiler, in many cases, to verify
+computations on the basis of dimensional analysis.  Yet, there needs
+to be mechanisms to overide the default behavior in many cases.  For
 example, both energy and torque have the same dimensions:
-Force * Distance.  Therefore, it remains the programmer's 
-responsibility, in this case, to assign the correct subclass to 
+Force * Distance.  Therefore, it remains the programmer's
+responsibility, in this case, to assign the correct subclass to
 Scalars that have this dimensionality.
 
 =head1 SYNOPSIS
@@ -388,37 +387,68 @@ Before the use statement, include a line turning debugging on, as in:
     BEGIN { $Physics::Unit::Scalar::debug = 1; }
     use Physics::Unit::Scalar;
 
-This will cause copious debugging output to be generated.  It will 
-also cause the creation of a file, Scalar_subtypes.pm, which defines 
-all of the subclasses of Scalar, based on the Unit types.  The text 
-of this file is evaled in order to define the subclasses. 
+This will cause copious debugging output to be generated.  It will
+also cause the creation of a file, Scalar_subtypes.pm, which defines
+all of the subclasses of Scalar, based on the Unit types.  The text
+of this file is evaled in order to define the subclasses.
 
-Classes and objects derived from Physics::Unit::Scalar follow these 
-rules: 
+=head1 IMPLEMENTATION NOTES
 
-* All objects of a particular class that derives from 
-Physics::Unit::Scalar use the same Physics::Unit object, and thus 
-have the same dimensionality and scale. 
+Classes and objects derived from Physics::Unit::Scalar follow these
+rules:
+
+* All objects of a particular class that derives from
+  Physics::Unit::Scalar use the same Physics::Unit object, and thus
+  have the same dimensionality and scale.
 
 * Objects of the Physics::Unit::Scalar class (and not a derived class)
-each have their own Physics::Unit object to describe the quantity. 
+  each have their own Physics::Unit object to describe the quantity.
 
-Thus, for example, all objects of type Physics::Unit::Distance use 
-the Unit object "1 meter".  Objects of type 
-Physics::Unit::Acceleration use the Unit object "1 meter / sec^2". 
+Thus, for example, all objects of type Physics::Unit::Distance use
+the Unit object "1 meter".  Objects of type
+Physics::Unit::Acceleration use the Unit object "1 meter / sec^2".
 
-Objects of type Physics::Unit::Scalar (and not a derived class) can 
-use any Unit whatsoever, for example, "1 furlong". There could also 
-exist an object of type Physics::Unit::Scalar using the Unit "1 
-meter", but that does not imply that it is a Physics::Unit::Distance 
-object. The distinction is important when considering the methods 
+Objects of type Physics::Unit::Scalar (and not a derived class) can
+use any Unit whatsoever, for example, "1 furlong". There could also
+exist an object of type Physics::Unit::Scalar using the Unit "1
+meter", but that does not imply that it is a Physics::Unit::Distance
+object. The distinction is important when considering the methods
 that can be used to manipulate and combine different Scalar types.
+
+
+=head1 PUBLIC FUNCTIONS
+
+=head2 ScalarFactory($type)
+
+Creates a new object of one of the subtypes of Scalar, from a
+definition string (format is the same as that used by the
+Physics::Unit module).
+
+The class of the resultant object is the same as the type of the
+unit created.
+
+If the type is undef, then the class of the resultant object
+will be 'Physics::Unit::Scalar'.
+
+If the type is 'unknown', then this function will throw an
+exception (die).
+
+=head2 GetScalar($arg)
+
+This function is used by many of the arithmetic function methods,
+wherever an argument specifies a Scalar.  Those arguments can be
+passed either as an actual Physics::Unit::Scalar object or as a
+string.
+
+This function returns a blessed Physics::Unit::Scalar object.
+
 
 =head1 PUBLIC METHODS
 
 =head2 new()
 
-Make a new user defined unit.
+Class or object method.  This makes a new user defined unit.
+For example:
 
     # This creates an object of a derived class
     $d = new Physics::Unit::Distance('3 miles');
@@ -435,33 +465,14 @@ Make a new user defined unit.
     # Copy constructor:
     $d2 = $d->new;
 
-This method allows you to create new Scalar objects in a number of 
-ways. 
+This method allows you to create new Scalar objects in a number of
+ways.
 
-If the type cannot be identified by the dimensionality of the unit, 
-then a Physics::Unit::Scalar object is returned.  For example: 
+If the type cannot be identified by the dimensionality of the unit,
+then a Physics::Unit::Scalar object is returned.  For example:
 
     $s = new Physics::Unit::Scalar('kg m s');
 
-=head2 ScalarFactory()
-
-Creates a new object of one of the subtypes of Scalar, from a
-definition string (format is the same as that used by the 
-Physics::Unit module).
-
-The class of the resultant object is the same as the type of the
-unit created.
-
-If the type is undef, then the class of the resultant object 
-will be 'Physics::Unit::Scalar'.
-
-If the type is 'unknown', then this function will throw an 
-exception (die).
-
-=head2 default_unit()
-
-Get or set the default unit object which is used when printing out
-the given Scalar.
 
 =head2 ToString()
 
@@ -470,13 +481,22 @@ the given Scalar.
 Prints out the scalar either in the default units or the unit
 specified.
 
+
+=head2 default_unit()
+
+Get the default unit object which is used when printing out
+the given Scalar.
+
+
 =head2 convert()
 
     $v = $scalar->convert(unit);
 
+
 =head2 value()
 
 Get or set the value.
+
 
 =head2 add()
 
@@ -502,6 +522,7 @@ Neither the original object nor the argument is changed.
 =head2 recip()
 
 Returns a new Scalar object which is the reciprocal of the object.
+The original object is unchanged.
 
 The original object is unchanged.
 
@@ -513,54 +534,11 @@ This returns a new Scalar object which is a quotient, i.e.
 
 Neither the original object nor the argument is changed.
 
-=head2 GetScalar()
 
-This function is used by many of the arithmetic function methods,
-wherever an argument specifies a Scalar.  Those arguments can be
-passed either as an actual Physics::Unit::Scalar object or as a 
-string.
-
-This function returns a blessed Physics::Unit::Scalar object.
-
-=head1 PRIVATE METHODS
-
-=head2 InitSubtypes()
-
-This is called during compilation, and creates classes for each of 
-the unit types defined in Physics::Unit.
-
-If $debug is set, then it prints out the modules it creates to a 
-file called ScalarSubtypes.pm.
-
-=head2 MyUnit()
-
-Returns a reference to the Unit object that is used to define the
-quantity.
-
-=head2 GetMyUnit()
-
-Get the class MyUnit.
-
-=head2 GetDefaultUnit()
-
-Get the class DefaultUnit.
-
-=head2 ScalarResolve()
-
-This takes an unblessed reference to a hash as an argument.  The hash 
-should have a value member and a MyUnit member.
-
-This determines the proper type of Scalar that the object should be 
-(based on MyUnit's type), 'normalizes' the Scalar, blesses it into 
-the proper subtype, and returns it.
-
-This is used by ScalarFactory and several of the arithmetic functions 
-(whenever the arithmetic function actually changes the dimensionality 
-of the unit, and thus the type of scalar).
 
 =head1 AUTHOR
 
-Chris Maloney <Dude@ChrisMaloney.com>
+Chris Maloney <Dude@chrismaloney.com>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -1,5 +1,6 @@
 # %W%
-# This test program contains all the examples from the documentation.
+# This test program contains all the examples from the Physics::Unit
+# documentation.
 
 use Physics::Unit ':ALL';
 
@@ -93,6 +94,10 @@ die "uh-oh" if ($u->name ne 'b');
 
 #---------------------
 
+die "damn!" if (GetUnit('rod')->type ne 'Distance');
+
+#---------------------
+
 $u1 = new Physics::Unit('kg m^2/s^2');
 $t = $u1->type;
 if (($$t[0] ne 'Energy' || $$t[1] ne 'Torque') &&
@@ -116,13 +121,13 @@ if (($$t[0] ne 'Energy' || $$t[1] ne 'Torque') &&
     ($$t[1] ne 'Energy' || $$t[0] ne 'Torque')
    )
 {
-    die "bonk";
+    die "blonk";
 }
 
 # But if we use a predefined, named unit, we get a single type:
 $u3 = GetUnit('joule')->new;    # *not*  Physics::Unit->new('joule');
 $t = $u3->type;
-if ($t ne 'Energy') { die "bink"; }
+if ($t ne 'Energy') { die "blink"; }
 
 #---------------------
 

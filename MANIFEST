@@ -2,8 +2,10 @@ Changes
 Makefile.PL
 MANIFEST
 README
-Unit.pm
+lib/Physics/Unit.pm
+lib/Physics/UnitImpl.pm
 lib/Physics/Unit/Scalar.pm
+lib/Physics/Unit/ScalarImpl.pm
 lib/Physics/Unit/ScalarSubtypes.pm
 lib/Physics/Unit/Vector.pm
 t/unit.t

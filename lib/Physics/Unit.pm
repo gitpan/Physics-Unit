@@ -1,7 +1,8 @@
 package Physics::Unit;
 
+print "howdy!\n";
+
 use strict;
-use warnings;
 use Carp;
 use base qw(Exporter);
 use vars qw(
@@ -27,12 +28,16 @@ my @export_ok_list = qw(
 
 %EXPORT_TAGS = ('ALL' => \@export_ok_list);
 @EXPORT_OK   = @export_ok_list;
-$VERSION = '0.01';
+$VERSION = '0.02';
+
+# This is the regular expression used to parse out a number.  It
+# is here so that other modules can use it for convenience.
 
 $number_re = '([-+]?((\d+\.?\d*)|(\.\d+))(E[-+]?((\d+\.?\d*)|(\.\d+)))?)';
 
-# The value of this hash is a string representing the token returned 
+# The value of this hash is a string representing the token returned
 # when this word is seen
+
 my %reserved_word = (
     per     => 'divide',
     square  => 'square',
@@ -55,7 +60,7 @@ my %prototype;
 # The number of base units
 my $NumBases = 0;
 
-# How many base units there are
+# The names of the base units
 my @BaseName;
 
 InitBaseUnit (
@@ -93,9 +98,21 @@ InitPrefix (
     'atto',    1e-18,
     'zepto',   1e-21,
     'yocto',   1e-24,
+
+    # binary prefixes
+    'kibi',    2^10,
+    'mebi',    2^20,
+    'gibi',    2^30,
+    'tebi',    2^40,
+    'pebi',    2^50,
+    'exbi',    2^60,
+
+    # others
+    'semi',    0.5,
+    'demi',    0.5,
 );
 
-# InitUnit {{{
+
 InitUnit (
     # Dimensionless
     ['pi',],    '3.1415926535897932385',
@@ -151,6 +168,7 @@ InitUnit (
     ['percent', '%',],      '0.01',
     ['dozen', 'doz',],        '12',
     ['gross',],              '144',
+
     # Angular
     ['radian', 'radians',],                 '1',
     ['steradian', 'sr', 'steradians',],     '1',
@@ -174,6 +192,10 @@ InitUnit (
     ['angstrom', 'a', 'angstroms',],            '1e-10 m',          # exact
     ['cm',],                                    'centimeter',       # exact
     ['km',],                                    'kilometer',        # exact
+
+    ['pica',],                                  'in/6',    # exact, but see
+                                                           # below
+    ['point',],                                 'pica/12',          # exact
 
     ['nautical-mile', 'nm', 'nauticalmiles',
      'nauticalmile', 'nautical-miles',],        '1852 m',           # exact
@@ -200,6 +222,7 @@ InitUnit (
     ['pound-mass', 'lbm', 'lbms',
      'pounds-mass'],                            '0.45359237 kg',    # exact
     ['ounce', 'oz', 'ounces'],                  'lbm/16',           # exact
+    ['stone', 'stones'],                        '14 lbm',           # exact
     ['hundredweight', 'hundredweights'],        '100 lbms',         # exact
     ['ton', 'tons', 'short-ton', 'short-tons'], '2000 lbms',        # exact
     ['long-ton', 'long-tons'],                  '2240 lbms',        # exact
@@ -219,9 +242,12 @@ InitUnit (
     ['dag',],                                   'decagram',         # exact
     ['dg',],                                    'decigram',         # exact
     ['cg',],                                    'centigram',        # exact
+    ['carat', 'carats', 'karat', 'karats',],    '200 milligrams',   # exact
+    ['j-point',],                               '2 carats',         # exact
 
     ['atomic-mass-unit', 'amu', 'u',
      'atomic-mass-units'],                      '1.6605402e-27 kg',
+
 
     # Time
     ['minute', 'min', 'mins', 'minutes'],               '60 s',
@@ -244,8 +270,11 @@ InitUnit (
     ['byte', 'bytes'], '8 bits',
 
     # Frequency
-    ['hertz', 'hz'],     '1/sec',
-    ['becquerel', 'bq'], '1 hz',
+    ['hertz', 'hz'],                    '1/sec',
+    ['becquerel', 'bq'],                '1 hz',
+    ['revolution', 'revolutions',],     '1',
+    ['rpm',],                           'revolutions per minute',
+    ['cycle', 'cycles',],                '1',
 
     # Current
     ['abampere', 'abamp', 'abamps', 'abamperes'],         '10 amps',
@@ -297,7 +326,7 @@ InitUnit (
     ['gauss',],       '1e-4 tesla',
 
     # Temperature
-    ['degree-rankine',],                        '5/9 * kelvin',     # exact
+    ['degree-rankine', 'degrees-rankine'],      '5/9 * kelvin',     # exact
 
     # Force
     ['pound', 'lb', 'lbs', 'pounds',
@@ -396,7 +425,7 @@ InitUnit (
     # Avogadro constant:
     ['na'],                              '6.022169/mol',
 );
-# }}}
+
 
 InitTypes (
     'Dimensionless'      => 'unity',
@@ -420,9 +449,8 @@ InitTypes (
     'Dose'               => 'gray',       #  of radiation
     'Acceleration'       => 'm/s^2',
 );
-# }}}
 
-# GetUnit {{{
+
 GetUnit('joule')->type('Energy');
 GetUnit('ev')->type('Energy');
 GetUnit('mev')->type('Energy');
@@ -434,19 +462,7 @@ GetUnit('btu')->type('Energy');
 GetUnit('erg')->type('Energy');
 GetUnit('kwh')->type('Energy');
 GetUnit('ftlb')->type('Torque');
-# }}}
 
-#InitSystem (
-#    'si', [ qw(m kg s newton square-meter cubic-meter watt joule
-#               pascal m/s coulomb volt farad ohm siemens tesla weber henry)
-#          ],
-#    'cgs', [ qw(cm gm s dyne square-centimeter cubic-centimeter watt
-#                erg dynes-per-square-centimeter centimeters-per-second)
-#           ],
-#    'english', [ qw(foot slug s pound square-foot cubic-foot horsepower
-#                    foot-pound pounds-per-square-inch feet-per-second)
-#               ],
-#);
 
 sub InitBaseUnit {
     while (@_) {
@@ -576,7 +592,7 @@ sub type {
     # See if the user is setting the type
     my $t;
     if ($t = shift) {
-        # XXX Maybe we should check that $t is a valid type name, and 
+        # XXX Maybe we should check that $t is a valid type name, and
         # XXX that it's type really does match.
         return $self->{type} = $t;
     }
@@ -598,7 +614,7 @@ sub type {
     }
 
     # Return value depends on whether we got zero, one, or multiple types
-    return undef 
+    return undef
         unless @t;
 
     return $self->{type} = $t[0]
@@ -616,7 +632,7 @@ sub name {
 sub abbr {
     my $self = shift;
     my $n = ${$self->{names}}[0];
-    return undef 
+    return undef
         unless defined $n;
 
     for ($self->names()) {
@@ -900,7 +916,7 @@ my $def;      # string being parsed
 my $tok;      # the token type
 my $numval;   # the value when the token is a number
 my $tokname;  # when it is a name
-my $indent;   # ?
+my $indent;   # used to indent debug messages
 
 # parser
 sub expr {
@@ -1186,115 +1202,115 @@ Physics::Unit - Manipulate physics units and dimensions.
 
 =head1 DESCRIPTION
 
-This module allows for the representation of physical quantities with 
+This module allows for the representation of physical quantities with
 encapsulated units.
 
-A Unit is defined by three things: a list of names, a conversion 
-factor, and a dimensionality vector. From the dimensionality, a type 
-can be derived (usually). 
+A Unit is defined by three things: a list of names, a conversion
+factor, and a dimensionality vector. From the dimensionality, a type
+can be derived (usually).
 
-There are two main types of Unit objects: named and anonymous. Named 
-Unit objects are constant. Anonymous Unit objects, however, can 
+There are two main types of Unit objects: named and anonymous. Named
+Unit objects are constant. Anonymous Unit objects, however, can
 dynamically change.
 
-Objects of class Unit define units of measurement that correspond to 
-physical quantities. This module allows you to manipulate these 
-units, generate new derived units from other units, and convert from 
-one unit to another. Each unit is defined by a conversion factor and 
-a dimensionality vector. 
+Objects of class Unit define units of measurement that correspond to
+physical quantities. This module allows you to manipulate these
+units, generate new derived units from other units, and convert from
+one unit to another. Each unit is defined by a conversion factor and
+a dimensionality vector.
 
-The conversion factor is a floating point number that specifies how 
+The conversion factor is a floating point number that specifies how
 this unit relates to a reference unit of the same dimensionality.
 
-The dimensionality vector holds a list of integers - each of which 
-records the power of a base unit in this unit. 
+The dimensionality vector holds a list of integers - each of which
+records the power of a base unit in this unit.
 
-For example, consider the unit of speed, "miles per hour". This has a 
-dimensionality of (Distance / Time), or of (Distance ^ 1 * Time ^ -1). 
-So this unit's dimensionality vector has a 1 in the place 
-corresponding to Distance, and a -1 in the place corresponding to 
-Time. 
+For example, consider the unit of speed, "miles per hour". This has a
+dimensionality of (Distance / Time), or of (Distance ^ 1 * Time ^ -1).
+So this unit's dimensionality vector has a 1 in the place
+corresponding to Distance, and a -1 in the place corresponding to
+Time.
 
-The reference unit for speed is "meters per second" (since meter is 
-the base unit corresponding to Distance, and second is the base unit 
-corresponding to Time). Therefore, the conversion factor for the unit 
-"miles per hour" is 0.44704, since 1 mph equals 0.44704 meters / sec. 
+The reference unit for speed is "meters per second" (since meter is
+the base unit corresponding to Distance, and second is the base unit
+corresponding to Time). Therefore, the conversion factor for the unit
+"miles per hour" is 0.44704, since 1 mph equals 0.44704 meters / sec.
 
-Try this: 
+Try this:
 
   print "One mph is ", GetUnit('mph')->factor, " meters / sec\n";
 
-Units that have the same dimensionality can be compared, and 
-converted from one to the other. 
+Units that have the same dimensionality can be compared, and
+converted from one to the other.
 
-Units are created through the use of unit expressions, which allow 
-you to combine previously defined named units in new and interesting 
-ways. In the synopsis above, "furlong / fortnight" is a unit 
+Units are created through the use of unit expressions, which allow
+you to combine previously defined named units in new and interesting
+ways. In the synopsis above, "furlong / fortnight" is a unit
 expression.
 
 =head1 Types of Units
 
-A Unit can have one or more names associated with it, or it can be 
-unnamed (anonymous). 
+A Unit can have one or more names associated with it, or it can be
+unnamed (anonymous).
 
-Named units are constant. This ensures that expressions used to 
-derive other units will remain consistent. For example, consider the 
-expression "miles per hour", which uses the unit name "hour" to 
-create a new, derived unit. It is possible that the same expression 
-is used multiple times during the life of a program to create new 
-Unit objects. If the unit refered to by the name "hour" was allowed 
-to change, then a new, derived unit could possibly be different from 
-another unit derived with the same expression. 
+Named units are constant. This ensures that expressions used to
+derive other units will remain consistent. For example, consider the
+expression "miles per hour", which uses the unit name "hour" to
+create a new, derived unit. It is possible that the same expression
+is used multiple times during the life of a program to create new
+Unit objects. If the unit refered to by the name "hour" was allowed
+to change, then a new, derived unit could possibly be different from
+another unit derived with the same expression.
 
-Anonymous units, however, can be changed. 
+Anonymous units, however, can be changed.
 
-Among named Units, there are three types: prefixes, base units, and 
-derived units. 
+Among named Units, there are three types: prefixes, base units, and
+derived units.
 
-A prefix Unit is a special case Unit object that: 
+A prefix Unit is a special case Unit object that:
 
-  * is dimensionless 
-  * has only one name 
+  * is dimensionless
+  * has only one name
 
-A prefix name can be used in unit expressions in a special manner. 
-They can be used as prefixes to other unit names, with no intervening 
-whitespace. For example, "kilo" is a commonly used prefix. It can 
-appear as in the following unit expressions: 
+A prefix name can be used in unit expressions in a special manner.
+They can be used as prefixes to other unit names, with no intervening
+whitespace. For example, "kilo" is a commonly used prefix. It can
+appear as in the following unit expressions:
 
   kilogram
   kilomegameter
 
-Prefixes are described more fully in the unit expressions section 
-below. 
+Prefixes are described more fully in the unit expressions section
+below.
 
-A base unit is one that defines a new base dimension. For example, 
-the unit meter is a base unit; it defines the dimension for Distance. 
+A base unit is one that defines a new base dimension. For example,
+the unit meter is a base unit; it defines the dimension for Distance.
 
-A derived unit is one that is built up from other named units from a 
-unit expression. 
+A derived unit is one that is built up from other named units from a
+unit expression.
 
-The terms base dimension and derived dimension (or derived type) are 
-sometimes used. Distance is an example of a base dimension. It is not 
-derived from any other set of dimensional quantities. Speed, however, 
-is a is a derived dimension (or derived type), corresponding to 
+The terms base dimension and derived dimension (or derived type) are
+sometimes used. Distance is an example of a base dimension. It is not
+derived from any other set of dimensional quantities. Speed, however,
+is a derived dimension (or derived type), corresponding to
 Distance / Time.
 
 =head1 Unit Names
 
-Unit names are not allowed to contain whitespace, or any of the 
-characters ^, *, /, (, ). Case is not significant. Also, they may not 
-begin with any sequence of characters that could be interpreted as a 
-decimal number. Furthermore, these reserved words are not allowed as 
-unit names: per, square, sq, cubic, squared, or cubed. Other than 
-that, pretty much anything goes. 
+Unit names are not allowed to contain whitespace, or any of the
+characters ^, *, /, (, ). Case is not significant. Also, they may not
+begin with any sequence of characters that could be interpreted as a
+decimal number. Furthermore, these reserved words are not allowed as
+unit names: per, square, sq, cubic, squared, or cubed. Other than
+that, pretty much anything goes.
 
-So, for example, each of these is a valid unit name: 
+So, for example, each of these is a valid unit name:
 
   blather
   blather-hour
   ..splather!min_glub
 
-But these are not: 
+But these are not:
 
   ^glub_glub   # contains invalid character ^
   .1foo        # '.1' looks a lot like a number
@@ -1302,57 +1318,57 @@ But these are not:
 
 =head1 Unit Expressions
 
-Unit Expressions allow you to create new unit objects from the set of 
-existing named units. Some examples of unit expressions are: 
+Unit Expressions allow you to create new unit objects from the set of
+existing named units. Some examples of unit expressions are:
 
   megaparsec / femtosecond
   kg / feet^2 sec
   square millimeter
   kilogram meters per second squared
 
-The explicit grammar for unit expressions is defined in the 
-implementation page. 
+The explicit grammar for unit expressions is defined in the
+implementation page.
 
-The operators allowed in unit expressions are, in order from high to 
-low precedence: 
+The operators allowed in unit expressions are, in order from high to
+low precedence:
 
 prefix
 
-Any prefix that is attached to a unit name is applied to that unit 
-immediately (highest precedence). Note that if there is whitespace 
-between the prefix and the unit name, this would be the space 
-operator, which is not the same (see below). 
+Any prefix that is attached to a unit name is applied to that unit
+immediately (highest precedence). Note that if there is whitespace
+between the prefix and the unit name, this would be the space
+operator, which is not the same (see below).
 
   square, sq, or cubic
 
-square or cube the next thing on the line 
+square or cube the next thing on the line
 
   squared or cubed
 
-square or cube the previous thing on the line 
+square or cube the previous thing on the line
 
   ** or ^
 
-exponentiation (must be to an integral power) 
+exponentiation (must be to an integral power)
 
   space
 
-any amount of whitespace between units is considered a multiplication 
+any amount of whitespace between units is considered a multiplication
 
   *, /, or per
 
-multiplication or division 
+multiplication or division
 
-Parentheses can be used to override the precedence of any of the 
-operators. 
+Parentheses can be used to override the precedence of any of the
+operators.
 
-Prefixes are special case units, whose names can be attached to 
-beginning of other units, with no intervening whitespace. The Unit 
-module comes with a rather complete set of predefined SI prefixes; 
-see the Units by Type page. 
+Prefixes are special case units, whose names can be attached to
+beginning of other units, with no intervening whitespace. The Unit
+module comes with a rather complete set of predefined SI prefixes;
+see the Units by Type page.
 
-The prefixes are allowed before units, or by themselves. Thus, these 
-are equivalent: 
+The prefixes are allowed before units, or by themselves. Thus, these
+are equivalent:
 
   megaparsec
   mega parsec
@@ -1360,18 +1376,18 @@ are equivalent:
   kilo**2 parsec
   square kilo parsec
 
-Note in the last example that square applies only to kilo, and not to 
-parsec. That's because the square operator has higher precedence than 
-the space. 
+Note in the last example that square applies only to kilo, and not to
+parsec. That's because the square operator has higher precedence than
+the space.
 
-Note, however, that the space operator has higher precedence than 
-'*', '/', or 'per'. This means that units separated by only 
-whitespace in the denominator of an expression do not need to be 
-enclosed in parentheses. Thus 
+Note, however, that the space operator has higher precedence than
+'*', '/', or 'per'. This means that units separated by only
+whitespace in the denominator of an expression do not need to be
+enclosed in parentheses. Thus
 
   meters / sec sec
 
-is a unit of acceleration, but 
+is a unit of acceleration, but
 
   meters / sec*sec
 
@@ -1379,69 +1395,113 @@ is not. The latter is equivalent to just 'meters'.
 
 =head1 Predefined Units
 
-A rather complete set of units is pre-defined in the library, so it 
-will probably be rare that you'll need to define your own. See the 
-units by name page, or the units by type page for a complete list. 
+A rather complete set of units is pre-defined in the library, so it
+will probably be rare that you'll need to define your own. See the
+units by name page, or the units by type page for a complete list.
 
-A pound is a unit of force. I was very much tempted to make it a unit 
-of mass, since that is much more often the way it is used, but I have 
-a feeling I would have had to take more guff for that than I'm 
-prepared to. The everyday pound, then, is named 'pound-mass', 'lbm', 
-'lbms', or 'pounds-mass'. 
+A pound is a unit of force. I was very much tempted to make it a unit
+of mass, since that is much more often the way it is used, but I have
+a feeling I would have had to take more guff for that than I'm
+prepared to. The everyday pound, then, is named 'pound-mass', 'lbm',
+'lbms', or 'pounds-mass'.
 
-However, I couldn't bring myself to do the same thing to all the 
-other American units derived from a pound. Therefore, ounce, ton, 
-long-ton, and hundredweight are all units of mass. 
+However, I couldn't bring myself to do the same thing to all the
+other American units derived from a pound. Therefore, ounce, ton,
+long-ton, and hundredweight are all units of mass.
 
-A few physical constants were defined as Unit objects. This list is 
-very restricted, however. I limited them to physical constants which 
-really qualify as universal, according to (as much as I know) of the 
-laws of physics, and a few constants which have been defined by 
-international agreement. Thus, they are: 
+A few physical constants were defined as Unit objects. This list is
+very restricted, however. I limited them to physical constants which
+really qualify as universal, according to (as much as I know of) the
+laws of physics, and a few constants which have been defined by
+international agreement. Thus, they are:
 
-  * c   - the speed of light 
-  * G   - the universal gravitational constant 
-  * eq  - elementary charge 
-  * em  - electron mass 
-  * u   - atomic mass unit 
-  * g0  - standard gravity 
-  * atm - standard atmosphere 
-  * re  - equatorial radius of the reference geoid 
-  * rp  - polar radius of the reference geoid 
-  * h   - Planck constant 
-  * Na  - Avogadro constant 
+  * c   - the speed of light
+  * G   - the universal gravitational constant
+  * eq  - elementary charge
+  * em  - electron mass
+  * u   - atomic mass unit
+  * g0  - standard gravity
+  * atm - standard atmosphere
+  * re  - equatorial radius of the reference geoid
+  * rp  - polar radius of the reference geoid
+  * h   - Planck constant
+  * Na  - Avogadro constant
 
-A few unit abbreviations had to be changed in order to avoid name 
-conflicts: 
 
-  * Elementary charge - abbreviated 'eq' instead of 'e' 
-  * Earth gravity - abbreviated 'g0' instead of 'g' 
+
+=head1 Name Conflicts and Resolutions
+
+A few unit names and abbreviations had to be changed in order to avoid name
+conflicts.  These are:
+
+Elementary charge - abbreviated 'eq' instead of 'e'
+
+Earth gravity - abbreviated 'g0' instead of 'g'
+
+point - there are several definitions for this term:
+  * typography -- point
+      * I define it to be exactly 1/72 of an inch
+      * my dictionary (Webster's II New College Dictionary) defines it as
+        0.01384 inch, or 72.2543 points / inch.
+      * The Convert::Units::Base module sez that it's commonly defined as
+        0.01383 inch, or 72.3066 points / inch.
+      * The Postscript documentation defines it as exactly 1/72 in.
+      * The Convert::Units::Base module documentation also sez
+        "Other type systems consider it 1/72.27 inch, or 0.01383 inches,
+        or 0.0148 inches.  Outside of that context, a point may be 1/120
+        or 1/144 inch."
+
+  * a unit of academic classwork, usually equal to to one hour of class work
+    per week during one semester
+  * 11 deg., 15 min. between any two adjacent markings on a mariner's
+    compass
+  * a unit of scoring in any of a very many games
+  * a unit equal to one dollar, used to quote the current prices of
+    commodoties or stocks
+  * a unit equal to one percentage point, used in reference to ownership
+  * 2 milligrams (or 0.01 carat) used by jewelers -- j-point
+
+minute -
+  * duration -- minute
+  * arc -- arcminute
+
+second -
+  * duration -- second
+  * arc -- arcsecond
+
+pound -
+  * as a unit of force -- pound, pound-force, pounds-force, pound-weight, lbf
+  * as a unit of mass -- pound-mass, pounds-mass, lbm
+  * another unit of mass -- troy-pound
+
+ounce -
+  * as a unit of mass -- ounce, ounce-force, ozf
+  * as a unit of volume -- fluid-ounce, floz, fluidounce
+  * another unit of mass - troy-ounce
+
+gram -
+  * as a unit of mass - gram
+  * as a unit of force -- gram-weight, gram-force
+
 
 =head1 Export Options
 
-By default, this module exports nothing. You can request all of the 
-utility functions to be exported as follows: 
+By default, this module exports nothing. You can request all of the
+utility functions to be exported as follows:
 
   use Physics::Unit ':ALL';
 
-Or, you can just get specific ones. For example: 
+Or, you can just get specific ones. For example:
 
   use Physics::Unit qw( GetUnit ListUnits );
-
-=head1 COMPILE-TIME STUFF
-
-This section of this module contains stuff which is actually executed
-at compile time, when this module is first read in as the result of
-the 'use Unit;' statement.  For the most part, all this initializes
-the pre-defined units.
 
 =head1 Class Data
 
 =head2 $debug
 
-Turning this on enables copious debugging information. This is a 
-package global, not a file-scoped lexical. So it can be turned on 
-like this 
+Turning this on enables copious debugging information. This is a
+package global, not a file-scoped lexical. So it can be turned on
+like this
 
   BEGIN { $Physics::Unit::debug = 1; }
 
@@ -1449,74 +1509,47 @@ like this
 
 =head2 $number_re
 
-This is the regular expression used to parse out a number.  It is 
+This is the regular expression used to parse out a number.  It is
 here so that other modules can use it for convenience.
 
-A (correct) regular expression for a floating point number, 
-optionally in exponent form. This is hard to come by. 
+A (correct) regular expression for a floating point number,
+optionally in exponent form. This is hard to come by.
 
 =head2 %reserved_word
 
-A list of reserved words in Unit expressions. 
+A list of reserved words in Unit expressions.
 
 =head2 %unit_by_name
 
-A list of all known unit names. The value of the hash is a reference 
-to the named unit object. 
+A list of all known unit names. The value of the hash is a reference
+to the named unit object.
 
 =head2 %prefix
 
-A list of all the valid prefixes. The value of the hash is a 
-reference to the unit object. Note that the names here are also in 
-%unit_by_name. 
+A list of all the valid prefixes. The value of the hash is a
+reference to the unit object. Note that the names here are also in
+%unit_by_name.
 
-These are special case unit names that can be attached to other units 
+These are special case unit names that can be attached to other units
 with no intervening spaces.
 
 =head2 %prototype
 
 A list of all the known types. The values of this hash are references
-to unit objects that exemplify these types. I.e., any other units 
-that have the same type will have the same dimensionality as the 
-example unit. 
+to unit objects that exemplify these types. I.e., any other units
+that have the same type will have the same dimensionality as the
+example unit.
 
 =head2 $NumBases
 
-The number of base units. 
+The number of base units.
 
 =head2 @BaseName
 
-The name of each of the base units. These names also appear in 
-%unit_by_name. 
+The name of each of the base units. These names also appear in
+%unit_by_name.
 
-=head2 InitBaseUnit()
 
-Initialize the default set of simple base units.
-
-This is called to inform the library how many independent dimensional 
-quantities there are, and what the 'base' unit is for each quantity.
-
-The library is initialized to know about these nine quantities.  More 
-can be added at run-time, if desired using this utility function.
-
-=head2 InitPrefix()
-
-Prefixes are just like dimensionless units, but they don't need to be 
-separated from the next unit by a space.
-
-Prefix units can only have one name.
-
-=head2 InitTypes()
-
-=head2 InitUnit()
-
-Define units in terms of other units.
-
-Note that forward references are not allowed here.
-
-=head2 GetUnit()
-
-Resolve the energy-torque ambiguity.
 
 =head1 PUBLIC UTILITY FUNCTIONS
 
@@ -1525,13 +1558,13 @@ Resolve the energy-torque ambiguity.
   Physics::Unit::InitBaseUnit( type, name-list,
                                type, name-list, ... );
 
-InitBaseUnit is used to define any number of new, fundamental, 
-independent dimensional quantities. Each such quantity is represented 
-by a Unit object, which must have at least one name. From these base 
-units, all the units in the system are derived. 
+InitBaseUnit is used to define any number of new, fundamental,
+independent dimensional quantities.  Each such quantity is represented
+by a Unit object, which must have at least one name.  From these base
+units, all the units in the system are derived.
 
-The library is initialized to know about nine base quantities. These 
-quantities, and the base units which represent them, are: 
+The library is initialized to know about nine base quantities. These
+quantities, and the base units which represent them, are:
 
   1.  Distance - meter
   2.  Mass - gram
@@ -1543,21 +1576,21 @@ quantities, and the base units which represent them, are:
   8.  Money - us-dollar
   9.  Data - bit
 
-More base quantities can be added at run-time, by calling this 
-function. The arguments to this function are in pairs. Each pair 
-consists of a type name followed by a reference to an array. The 
-array consists of a list of names which can be used to reference the 
-unit. For example: 
+More base quantities can be added at run-time, by calling this
+function. The arguments to this function are in pairs. Each pair
+consists of a type name followed by a reference to an array. The
+array consists of a list of names which can be used to reference the
+unit. For example:
 
   InitBaseUnit('Beauty' => ['sarah', 'sarahs', 'smw']);
 
-This defines a new basic physical type, called Beauty. This also 
-causes the creation of a single new Unit object, which has three 
-names: sarah, sarahs, and smw. The type Beauty is refered to as a 
-base type. The Unit sarah is refered to as the base unit 
-corresponding to the type Beauty. 
+This defines a new basic physical type, called Beauty. This also
+causes the creation of a single new Unit object, which has three
+names: sarah, sarahs, and smw. The type Beauty is refered to as a
+base type. The Unit sarah is refered to as the base unit
+corresponding to the type Beauty.
 
-After defining a new base unit and type, you can then create other 
+After defining a new base unit and type, you can then create other
 units derived from this unit, and other types derived from this type.
 
 =head2 InitPrefix()
@@ -1565,17 +1598,17 @@ units derived from this unit, and other types derived from this type.
   Physics::Unit::InitPrefix( name, number,
                              name, number, ... );
 
-This function is used to define strings that can be used to prefix 
-any other unit name. As with InitBaseUnit, the library is initialized 
-to know about a fair set of prefixes, and more can be added at 
-run-time. 
+This function is used to define strings that can be used to prefix
+any other unit name.  As with InitBaseUnit, the library is initialized
+to know about a fair set of prefixes, and more can be added at
+run-time.
 
-If you desire to create a prefix at run-time, call InitPrefix with a 
-list of name-value pairs, for example: 
+If you desire to create a prefix at run-time, call InitPrefix with a
+list of name-value pairs, for example:
 
   InitPrefix('gonzo' => 1e100, 'piccolo' => 1e-100);
 
-From then on, you can use those prefixes to define new units, as in: 
+From then on, you can use those prefixes to define new units, as in:
 
   $beauty_rate = new Physics::Unit('5 piccolosarah / hour');
 
@@ -1584,24 +1617,26 @@ From then on, you can use those prefixes to define new units, as in:
   Physics::Unit::InitUnit( name-list, unit-def,
                            name-list, unit-def, ... );
 
-This function creates one or more new named Units. This may also be 
-called by users at runtime, to expand the unit system. For example: 
+This function creates one or more new named Units.  This is called at
+compile time to initialize the module with all the predefined units.
+It may also be
+called by users at runtime, to expand the unit system. For example:
 
   InitUnit( ['chris', 'cfm'] => '3 piccolosarahs' );
 
-creates another unit of type Beauty equal to 3 * 10-100 sarahs. 
+creates another unit of type Beauty equal to 3 * 10-100 sarahs.
 
-Both this utility function and the new class method can be used to 
-create new, named Units. There are minor differences between these 
-two. The new method only allows you to create one unit at a time, 
-whereas the InitUnit function can be used to create a large set of 
-units with one call. The other difference is that units created with 
-InitUnit must have a name, whereas new can be used to create anonymous 
-Unit objects. 
+Both this utility function and the new class method can be used to
+create new, named Units. There are minor differences between these
+two. The new method only allows you to create one unit at a time,
+whereas the InitUnit function can be used to create a large set of
+units with one call. The other difference is that units created with
+InitUnit must have a name, whereas new can be used to create anonymous
+Unit objects.
 
-In this function and in others, wherever an argument is specified as 
-unit-def, you can use either a Unit object, a single unit name, or a 
-unit expression. So, for example, these are the same: 
+In this function and in others, wherever an argument is specified as
+unit-def, you can use either a Unit object, a single unit name, or a
+unit expression. So, for example, these are the same:
 
   InitUnit( ['mycron'], '3600 sec' );
   InitUnit( ['mycron'], 'hour' );
@@ -1614,37 +1649,37 @@ creates a new unit named mycron which is the same as one hour.
   Physics::Unit::InitTypes( type-name, unit-def,
                             type-name, unit-def, ... );
 
-Use this function to define derived types. For example: 
+Use this function to define derived types. For example:
 
   InitTypes( 'Aging' => 'chris / year' );
 
-might describe the loss of beauty with time. 
+might describe the loss of beauty with time.
 
-This function associates a type name with a specific dimensionality. 
-The factor of the unit is not used. I.e., in the above example, Aging 
-is associated with ( Beauty / Time ). The factor of the unit 
-'chris / year' is not used. 
+This function associates a type name with a specific dimensionality.
+The factor of the unit is not used. I.e., in the above example, Aging
+is associated with ( Beauty / Time ). The factor of the unit
+'chris / year' is not used.
 
-The unit-def argument can be a single unit name, a unit expression, 
-or a Unit object. 
+The unit-def argument can be a single unit name, a unit expression,
+or a Unit object.
 
 =head2 GetUnit()
 
   $u = Physics::Unit::GetUnit( unit-def );
 
-Returns a unit associated with the the argument passed in. The 
+Returns a unit associated with the the argument passed in. The
 argument can either be a name, a unit expression, or a Unit object.
 
-If the argument is a Unit object, it is simply returned. If the 
-argument is a simple unit name, then this returns a reference to the 
-named unit. 
+If the argument is a Unit object, it is simply returned. If the
+argument is a simple unit name, then this returns a reference to the
+named unit.
 
-If the argument cannot be found as a simple unit name, then this 
-method attempts to evaluate it as an expression. If it is successful, 
-it will create a new, anonymous Unit object and return a reference to 
-it. 
+If the argument cannot be found as a simple unit name, then this
+method attempts to evaluate it as an expression. If it is successful,
+it will create a new, anonymous Unit object and return a reference to
+it.
 
-For example: 
+For example:
 
   # This returns a reference to a pre-defined, named unit:
   $u = GetUnit('gram');
@@ -1656,14 +1691,14 @@ For example:
 
   @l = Physics::Unit::ListUnits;
 
-Returns a list of all unit names known, sorted alphabetically. 
+Returns a list of all unit names known, sorted alphabetically.
 
 =head2 ListTypes()
 
   @l = Physics::Unit::ListTypes;
 
-Returns a list of all the quantity types known to the library, sorted 
-alphabetically. 
+Returns a list of all the quantity types known to the library, sorted
+alphabetically.
 
 =head2 NumBases()
 
@@ -1675,7 +1710,8 @@ Returns the number of base dimension units.
 
   $u = Physics::Unit::GetTypeUnit( type-name );
 
-Returns the Unit object corresponding to a given type. 
+Returns the Unit object corresponding to a given type.
+
 
 =head1 PUBLIC METHODS
 
@@ -1684,26 +1720,26 @@ Returns the Unit object corresponding to a given type.
   $u1 = new Physics::Unit( unit-def [, name, name, ... ] );
   $u2 = $u1->new( [name, name, ... ] );
 
-This method creates a new Unit object. The names are optional. (Note: 
-the square brackets above are used to indicate that the name list is 
-optional, not that the argument is a reference to an anonymous array. 
-See the examples below.) 
+This method creates a new Unit object. The names are optional. (Note:
+the square brackets above are used to indicate that the name list is
+optional, not that the argument is a reference to an anonymous array.
+See the examples below.)
 
-If names are given, then the new Unit will be given those names, and 
-that object will thereafter be constant. 
+If names are given, then the new Unit will be given those names, and
+that object will thereafter be constant.
 
-If more than one name is given, the first is the primary name. The 
-primary name is retrieved whenever the name method is called. 
+If more than one name is given, the first is the primary name. The
+primary name is retrieved whenever the name method is called.
 
-If a unit has a name or names, those names must be different than 
-every other unit name known to the library. See the Unit by Names 
-page to see an alphabetical list of all the pre-defined unit names. 
+If a unit has a name or names, those names must be different than
+every other unit name known to the library. See the Unit by Names
+page to see an alphabetical list of all the pre-defined unit names.
 
-If no names are given, then an anonymous unit is created. Note that 
-another way of creating new anonymous units is with the GetUnit 
-utility function. 
+If no names are given, then an anonymous unit is created. Note that
+another way of creating new anonymous units is with the GetUnit
+utility function.
 
-Examples: 
+Examples:
 
   # Create a new, anonymous unit:
   $u = new Physics::Unit ('3 pi sarahs per s');
@@ -1715,60 +1751,63 @@ Examples:
   $u  = new Physics::Unit ('3 pi sarahs per s', 'b', 'blooms', 'blm');
   $n = $u->name;   # returns 'b'
 
+  @@ - add a description, and an example of the use of this as an object
+       method
+
 =head2 type()
 
   $t = $u->type;
   $u->type( type-name );
 
-Get or set this unit's type. 
+Get or set this unit's type.
 
-For example: 
+For example:
 
   GetUnit('rod')->type;    # returns 'Distance'
 
-It will almost never be necessary to set a Unit object's type. The type 
-is normally determined uniquely from the dimensionality of the unit. 
-However, occasionally, more than one type can match a given unit's 
-dimensionality. For example, Torque and Energy have the same 
-dimensionality. 
+It will almost never be necessary to set a Unit object's type. The type
+is normally determined uniquely from the dimensionality of the unit.
+However, occasionally, more than one type can match a given unit's
+dimensionality. For example, Torque and Energy have the same
+dimensionality.
 
-In that case, all of the predefined, named units are explicitly 
-designated to be one type or the other. For example, the unit newton 
-is defined to have the type Energy. See the list of units by type to 
-see which units are defined as Energy and which as Torque. 
+In that case, all of the predefined, named units are explicitly
+designated to be one type or the other. For example, the unit newton
+is defined to have the type Energy. See the list of units by type to
+see which units are defined as Energy and which as Torque.
 
-However, if you are going to create new Unit objects from unit 
-expressions that have that dimensionality, it will be necessary to 
-explicitly specify which type that unit object is. 
+However, if you are going to create new Unit objects from unit
+expressions that have that dimensionality, it will be necessary to
+explicitly specify which type that unit object is.
 
-When this method is called to set the unit's type, only one type 
-string argument is allowed, and it must be a predefined type name 
-(see InitTypes above). 
+When this method is called to set the unit's type, only one type
+string argument is allowed, and it must be a predefined type name
+(see InitTypes above).
 
-Once a single type has been associated with a unit, then that will 
-remain that unit's type for the rest of the program, unless it is 
-re-set again. 
+Once a single type has been associated with a unit, then that will
+remain that unit's type for the rest of the program, unless it is
+re-set again.
 
-This method returns one of: 
+This method returns one of:
 
   undef
 
-no type was found to match the unit's dimensionality 
+no type was found to match the unit's dimensionality
 
   'prefix'
 
-in the special case where the unit is a named prefix 
+in the special case where the unit is a named prefix
 
   type_name
 
-the prototype unit for type_name matches the unit's dimensionality 
-(see InitTypes above) 
+the prototype unit for type_name matches the unit's dimensionality
+(see InitTypes above)
 
   ref to an array of type_name's
 
-more than one type was found to match the unit's dimensionality 
+more than one type was found to match the unit's dimensionality
 
-Some examples may perhaps make this clear: 
+Some examples may perhaps make this clear:
 
   $u1 = new Physics::Unit('kg m^2/s^2');
   $t = $u1->type;       #  $t == ['Energy', 'Torque']
@@ -1790,21 +1829,21 @@ Some examples may perhaps make this clear:
 
   $n = $u->name;
 
-Returns the primary name of the unit. If this unit has no names, then 
-this method returns undef. 
+Returns the primary name of the unit. If this unit has no names, then
+this method returns undef.
 
 =head2 abbr()
 
   $a = $u->abbr;
 
-Returns the shortest name of the unit. If this unit has no names, 
+Returns the shortest name of the unit. If this unit has no names,
 this method will return the undef.
 
 =head2 names()
 
   @a = $u->names;
 
-Returns a list of names that can be used to reference the unit. 
+Returns a list of names that can be used to reference the unit.
 Returns undef if the unit is unnamed.
 
 Be aware: this might be an empty list - whereas the name() method
@@ -1814,23 +1853,23 @@ above will always return something meaningful.
 
   $s = $u->def;
 
-Returns the string that was used to define this unit. Note that if 
-the unit has been manipulated with any of the arithmetic methods, 
-then the def method will return undef, since the definition string is 
-no longer a valid definition of the unit. 
+Returns the string that was used to define this unit.  Note that if
+the unit has been manipulated with any of the arithmetic methods,
+then the def method will return undef, since the definition string is
+no longer a valid definition of the unit.
 
 =head2 expanded()
 
   $s = $u->expanded;
 
-Produces a string representation of the unit, in terms of the base 
+Produces a string representation of the unit, in terms of the base
 units (see InitBaseUnit above).
 
 For example:
 
   print GetUnit('calorie')->expanded, "\n";
 
-produces 
+produces
 
   4184 m^2 gm s^-2
 
@@ -1838,45 +1877,40 @@ produces
 
   $s = $u->ToString;
 
-There are several ways to have a Unit object print itself to a string. 
-This method is designed to give you what you usually want, and to be 
-guaranteed to always print out something meaningful. 
+There are several ways to have a Unit object print itself to a string.
+This method is designed to give you what you usually want, and to be
+guaranteed to always print out something meaningful.
 
-If the object is named, this does the same as the name method above. 
-Otherwise, if the object's definition string is still valid, this 
-does the same as the def method above. Otherwise, this does the same 
-thing as the expanded method. 
+If the object is named, this does the same as the name method above.
+Otherwise, if the object's definition string is still valid, this
+does the same as the def method above. Otherwise, this does the same
+thing as the expanded method.
 
 =head2 factor()
 
   $f = $u->factor;
   $u->factor(newvalue);    # $u must be unnamed
 
-Get or set the unit's conversion factor. If this is used to set a 
-Unit's factor, then the Unit object must be anonymous. 
+Get or set the unit's conversion factor. If this is used to set a
+Unit's factor, then the Unit object must be anonymous.
 
 =head2 convert()
 
   $f = $u->convert( unit-def );
 
-Returns the number which converts this unit to another. The types of 
-the units must match. For example: 
+Returns the number which converts this unit to another. The types of
+the units must match. For example:
 
   $mile = GetUnit('mile');
   $foot = GetUnit('foot');
   $c = $mile->convert($foot);     # returns 5280
 
-For example:
-
-   $mile = Unit::GetUnit('mile');
-   $foot = Unit::GetUnit('foot');
-   $c = $mile->convert($foot);     # $c == 5280
 
 =head2 times()
 
   $u->times( unit-def );
 
-$u is multiplied by unit.  $u must be anonymous.
+$u is multiplied by either a Unit or a number.  $u must be anonymous.
 
 =head2 recip()
 
@@ -1888,9 +1922,10 @@ $u is replaced with its reciprocal.  $u must be anonymous.
 
   $u->divide( unit-def );
 
-$u is divided by unit and the result replaces $u.  $u must be anonymous. 
+$u is divided by either a Unit or a number, and the result replaces $u.
+$u must be anonymous.
 
-For example: 
+For example:
 
   $u = new Physics::Unit('36 m^2');
   $u->divide('3 meters');    # $u is now '12 m'
@@ -1901,150 +1936,92 @@ For example:
 
   $u->power( integer );
 
-Raises a unit to an integral power. $u must be anonymous. 
+Raises a unit to an integral power.  $u must be anonymous.
 
 =head2 add()
 
   $u->add( unit );   # unit types must match
 
-unit is added to $u. $u must be anonymous. 
+unit is added to $u.  $u and unit must be of the same type.
+$u must be anonymous.
 
 =head2 neg()
 
   $u->neg;
 
-$u is replaced with its arithmetic negative. $u must be anonymous. 
+$u is replaced with its arithmetic negative.  $u must be anonymous.
 
 =head2 subtract()
 
   $u->subtract( unit-def );   # unit types must match
 
-unit is subtracted from $u. $u must be anonymous.
+unit is subtracted from $u.  $u and unit must be of the same type.
+$u must be anonymous.
 
 =head2 copy()
 
   $n = $u->copy;
 
-This creates a copy of an existing unit. It doesn't copy the names, 
-however. So you are free to modify the copy (while modification of 
-named units is verboten). 
+This creates a copy of an existing unit. It doesn't copy the names,
+however.  So you are free to modify the copy (while modification of
+named units is verboten).
 
-If the type of the existing unit is well-defined, then it, also, is 
-copied. 
+If the type of the existing unit is well-defined, then it, also, is
+copied.
 
-This is the same as the new method, when new is called as an object 
-method with no names. 
+This is the same as the new method, when new is called as an object
+method with no names.
 
 =head2 equal()
 
   $u1->equal( unit-def );
   Physics::Unit->equal( unit-def, unit-def );
 
-This returns 1 if the two unit objects have the same type and the 
-same conversion factor. 
+This returns 1 if the two unit objects have the same type and the
+same conversion factor.
 
-=head1 PRIVATE IMPLEMENTATION ROUTINES
 
-These are not part of the user-interface.  These are only for use 
-within the package.
+=head1 EXPRESSION GRAMMAR
 
-=head2 NewOne()
-
-Creates a new dimensionless unit.
-
-=head2 AddNames()
-
-This is called during the object's construction to add a list of
-names to the 'names' array, and to set the reference in the
-%unit_by_names cross-reference hash.
-
-=head2 NewType()
-
-   $u->NewType('type');
-
-This is called when we are adding a new type to the system.  This
-happens both in InitBaseUnits() and in InitTypes().
-
-=head2 CreateUnit()
-
-This is used by several of the interface utility functions to create
-a new unit object from a unit definition (either a simple name, a
-unit expression, or a unit object).
-
-It differs from GetUnit in that it always creates a new, anonymous
-unit, whereas GetUnit, if given a simple name, returns a reference
-to a named unit.
-
-=head2 CompareDim()
-
-Compare the dimension arrays.
-
-Return 0 if they are the same.
-
-=head2 LookName()
-
-Look up the name.
-
-Returns:
-
-  0 not defined
-  1 reserved word
-  2 unit name
-  3 type name
-
-=head2 DebugString()
-
-Convert the unit to a factor - dimension vector format string, e.g.
-the unit '3 meters' would be converted to something like
-
-  3 [1, 0, 0]
-
-=head2 CheckChange()
-
-Complain if this unit has a name.  This is used by all the methods
-that modify the value of the unit.
-
-=head1 PARSER
-
-=head2 expr()
-
-=head2 term()
+  expr : term
+       | term '/' expr
+       | term '*' expr
+       | term 'per' expr
 
   term : factor
        | term factor
 
 A term is any number of factors separated (nominally) by whitespace.
 Whitespace is an 'operator' that means the same thing as multiplication,
-but has a higher priority than either '*' or '/'.
+but has a higher priority than either '*', '/', or 'per'.
 
 Examples of terms (the following lines each contain one term):
 
   3pi radians
   3e+4 globules
 
-=head2 Factor()
-
-  factor : primary
-         | primary '**' integer
+  factor : prim
+         | prim '**' integer
 
 Note that a primary can be an integer, of course, so factors can
 look like this:
 
   meter ** 3 ^ 5    # note, '**' and '^' are synonymous
 
-=head2 prim()
+  prim : number
+       | word
+       | '(' expr ')'
+       | 'square' primary
+       | 'sq' primary
+       | 'cubic' primary
+       | primary 'squared'
+       | primary 'cubed'
 
-The unary operators square, sq, cubic, squared, and cubed are
-implemented as part of this function.  Thus they have quite a
-high precedence, as I think they should.
 
-=head2 get_token()
-
-only used by new above to parse the unit definition string
 
 =head1 AUTHOR
 
-Written by Chris Maloney <Dude@ChrisMaloney.com>
+Written by Chris Maloney <Dude@chrismaloney.com>
 
 Formatted for distribution by Gene Boggs <cpan@ology.net>
 

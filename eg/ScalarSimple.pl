@@ -1,3 +1,6 @@
+# This contains, among other things, the examples from the
+# Physics::Unit::Scalar documentation.
+
 BEGIN {
     if ($ARGV[0] eq '-d') {
         $Physics::Unit::Scalar::debug = 1;

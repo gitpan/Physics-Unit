@@ -2,7 +2,7 @@ package Physics::Unit::Acceleration;
 use strict;
 use Physics::Unit::Scalar;
 use vars qw( $VERSION @ISA $MyUnit );
-$VERSION = '0.01';
+$VERSION = '0.02';
 @ISA = qw( Physics::Unit::Scalar );
 
 $MyUnit = GetUnit('m/s^2');
@@ -281,11 +281,11 @@ __END__
 
 =head1 NAME
 
-Physics::Unit::Unit::ScalarSubtypes - User defined dimensional units.
+Physics::Unit::ScalarSubtypes - User defined dimensional units.
 
 =head1 AUTHOR
 
-Chris Maloney <Dude@ChrisMaloney.com>
+Chris Maloney <Dude@chrismaloney.com>
 
 =head1 COPYRIGHT AND LICENSE
 
