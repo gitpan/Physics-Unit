@@ -3,7 +3,7 @@ package Physics::Unit::Vector;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.02';
+$VERSION = '0.03';
 use Physics::Unit::Scalar;
 
 
@@ -42,10 +42,14 @@ sub new {
 
         # The first argument will tell us what type of vector this is
         my $s = shift;
+        print "first argument is $s.\n" if $debug;
+
         if (!ref($s))
         {
             $s = Physics::Unit::Scalar->new($s);
         }
+        print "which converts to the argument $s.\n" if $debug;
+
         my @scalar;
         push @scalar, $s;
 

@@ -1,132 +1,188 @@
-# %W%
-# This test program generates the unit_by_name.html and
-# unit_by_type.html pages.
+# This test program generates the UnitsByName.html and
+# UnitsByType.html pages.
 
 use Physics::Unit ':ALL';
+use strict;
 
-GenerateUnitsPages();
+GenPages();
 print "ok\n";
 
-#-----------------------------------------------------------
-# used for sorting an array of unit names by type.
-# Note: 'unknown' is first, 'prefix' next
-sub by_type {
-    my $ua = GetUnit($a);
-    my $ub = GetUnit($b);
-    my $ta = $ua->type();
-    my $tb = $ub->type();
-
-    if ($ta eq 'unknown') { $ta = 0; }
-    if ($tb eq 'unknown') { $tb = 0; }
-    if ($ta eq 'prefix') { $ta = 1; }
-    if ($tb eq 'prefix') { $tb = 1; }
-
-    my $fa = $ua->factor;
-    my $fb = $ub->factor;
-    $r = ($ta cmp $tb) || ($fa <=> $fb) || ($a cmp $b);
-    return $r;
-}
 
 #-----------------------------------------------------------
-sub GenerateUnitsPages {
+sub GenPages
+{
+    # Define some constants:
 
-$html_header = <<END_HEAD;
-<html>
-  <head>
-    <title>Units %s</title>
-  </head>
-  <body background="bg-paper.gif">
-
-    <h2>Units %s</h2>
-    <ul>
-END_HEAD
-
-$html_table_header = <<END_TABLE_HEAD;
-      <table border=1 cellpadding=2>
-        <tr>
-          <th><b>Unit</b></th>
-          <th><b>Type</b></th>
-          <th><b>Value</b></th>
-          <th><b>Expanded</b></th>
-        </tr>
-END_TABLE_HEAD
-
-$html_trailer = <<END_TAIL;
+    my $trailer = <<END_TRAILER;
       </table>
-    </ul>
   </body>
 </html>
-END_TAIL
+END_TRAILER
+
+
+    my $outFile;
+
 
     # Generate Units by Name
 
-    open NAMES, ">units_by_name.html";
-    printf NAMES ($html_header, "by Name", "by Name");
-    printf NAMES ($html_table_header);
+    $outFile = "UnitsByName.html";
+    open NAMES, ">$outFile" or die "Can't open $outFile for output";
+    print "Generating $outFile\n";
 
-    for $name (ListUnits()) {
-        $n = GetUnit($name);
-        printrow("<a name=\"$name\">$name</a>",
-                 $n->type(), $n->def(), $n->expanded());
+    print NAMES header("Name");
+    print NAMES tableHeader(1);
+
+    for my $name (ListUnits()) {
+        my $n = GetUnit($name);
+        printrow(1, $name, $n->type(), $n->def(), $n->expanded());
     }
 
-    print NAMES $html_trailer;
+    print NAMES $trailer;
     close NAMES;
 
 
     # Generate Units by Type
 
-    open NAMES, ">units_by_type.html";
-    printf NAMES ($html_header, "by Type", "by Type");
+    $outFile = "UnitsByType.html";
+    open NAMES, ">$outFile" or die "Can't open $outFile for output";
+    print "Generating $outFile\n";
 
-    @n = ListUnits();
-    @n = sort by_type @n;
-
-    # First pass: get the first unit of each type
-
-    $t = '';
-    for $name (@n) {
-        $n = GetUnit($name);
-        if ($n->type ne $t) {
-            $t = $n->type;
-            $target{$t} = $name;
-        }
-    }
+    print NAMES header("Type");
 
     # Print out the "Table of Contents"
 
-    print NAMES "\n";
-    print NAMES "      <a href=\"#yocto\">prefix</a>,\n";
-    @t = ListTypes();
-    while ($t = shift @t) {
-        print NAMES "      <a href=\"#$target{$t}\">$t</a>";
-        if (@t) {
-            print NAMES ",";
+    my @t = ('Unknown', 'prefix', ListTypes());
+    my @links = map "      <a href='#$_'>$_</a>", @t;
+    print NAMES join ",\n", @links;
+
+    # Print out the table
+
+    print NAMES "\n      <p>\n" .
+                tableHeader(0);
+
+    my $lastType = '-';
+    for my $name (sort byType ListUnits())
+    {
+        my $n = GetUnit($name);
+        my $t = $n->type;
+        if ($t ne $lastType) {
+            print NAMES typeRow($t);
+            $lastType = $t;
         }
-        print NAMES "\n";
-    }
-    print NAMES "      <p>\n";
 
-    printf NAMES ($html_table_header);
-
-    # Second pass: print out the table
-
-    for $name (@n) {
-        $n = GetUnit($name);
-        printrow("<a name=\"$name\">$name</a>",
-                 $n->type(), $n->def(), $n->expanded());
+        printrow(0, $name, $t, $n->def, $n->expanded);
     }
 
-    print NAMES $html_trailer;
+    print NAMES $trailer;
     close NAMES;
 }
 
-sub printrow {
-    my ($d1, $d2, $d3, $d4) = @_;
+#-----------------------------------------------------------
+sub header
+{
+    my $sortBy = shift;
+    my $title = "Units by $sortBy";
+
+    return <<END_HEADER;
+<html>
+  <head>
+    <title>$title</title>
+    <style type='text/css'>
+      <!--
+        body {
+          background: url(bg.gif) #FBF1E9;
+        }
+        th {
+          color: white;
+          font-size: larger;
+        }
+      -->
+    </style>
+  </head>
+  <body background="bg-paper.gif">
+
+    <h1>$title</h1>
+END_HEADER
+}
+
+#-----------------------------------------------------------
+sub tableHeader
+{
+    my $printType = shift;
+
+    my $th = "      <table border='1' cellpadding='2'>\n" .
+             "        <tr bgcolor='#003070'>\n" .
+             "          <th>Unit</th>\n" .
+             ($printType ? "          <th>Type</th>\n" : '') .
+             "          <th>Value</th>\n" .
+             "          <th>Expanded</th>\n" .
+             "        </tr>\n";
+
+    return $th;
+}
+
+#-----------------------------------------------------------
+sub printrow
+{
+    my ($printType, $name, $t, $d, $ex) = @_;
     print NAMES "        <tr>\n" .
-                "          <td>$d1</td>\n" .
-                "          <td>" . ($d2 ? $d2 : '?') . "</td>\n" .
-                "          <td>$d3</td>\n" .
-                "          <td>$d4</td>\n" .
+                "          <td>$name</td>\n" .
+                ($printType ?
+                    "          <td>" . typeStr($t) . "</td>\n" : '') .
+                "          <td>$d</td>\n" .
+                "          <td>$ex</td>\n" .
                 "        </tr>\n";
 }
+
+#-----------------------------------------------------------
+# This is used in a couple of places.  It returns a human-readable
+# string for a type.  If $t is undef, this returns "Unknown";
+# otherwise, this returns $t.
+
+sub typeStr
+{
+    my $t = shift;
+    return !defined $t ? 'Unknown' : $t;
+}
+
+#-----------------------------------------------------------
+# Used for sorting an array of unit names by type.
+# Note: 'unknown' is first, 'prefix' next
+
+sub byType
+{
+    my $ua = GetUnit($a);
+    my $ub = GetUnit($b);
+
+    return altType($ua->type) cmp altType($ub->type) ||
+           $ua->factor <=> $ub->factor ||
+           $a cmp $b;
+}
+
+#-----------------------------------------------------------
+# This is used by the byType comparison routine.  This takes a
+# unit's type and returns a value that ensures that undef (type is
+# unknown) is sorted first, then 'prefix' and then the other types.
+
+sub altType
+{
+    my $t = shift;
+
+    return !defined $t ? 0 :
+           $t eq 'prefix'  ? 1 :
+           $t;
+}
+
+#-----------------------------------------------------------
+sub typeRow
+{
+    my $t = shift;
+    my $ts = typeStr($t);
+
+    return "      <tr bgcolor='#B0D8FC'>\n" .
+           "        <td colspan='4'>\n" .
+           "          <a name='$ts'>$ts</a> Types\n" .
+           "        </td>\n" .
+           "      </tr>\n";
+}
+

@@ -1,3 +1,10 @@
+BEGIN {
+    # '-d' is used to debug the unit expression parser
+    if ($ARGV[0] eq '-d') {
+        $Physics::Unit::debug = 1;
+    }
+}
+
 use Physics::Unit ':ALL';
 
 

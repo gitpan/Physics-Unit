@@ -1,4 +1,4 @@
-Physics/Unit version 0.02
+Physics/Unit version 0.03
 =========================
 
 This tarball includes four modules:
@@ -7,16 +7,21 @@ This tarball includes four modules:
   Physics::Unit::ScalarSubtypes
   Physics::Unit::Vector
 
+It also includes two modules which only include documentation
+(implementation notes):
+  Physics::UnitImpl
+  Physics::Unit::ScalarImpl
+
 Objects of class Physics::Unit define units of measurement that correspond
 to physical quantities.  This module allows you to manipulate these units,
 generate new derived units from other units, and convert from one unit
 to another.  Each unit is defined by a conversion factor and a
 dimensionality vector.
 
-Objects of type Physics::Scalar store physical quantities.  Each instance
-of a class that derives from Physics::Scalar holds the value of some type
-of measurable quantity.  When you use this module, several new classes are
-immediately available.  See the Derived Classes section of the
+Objects of type Physics::Unit::Scalar store physical quantities.  Each
+instance of a class that derives from Physics::Unit::Scalar holds the value
+of some type of measurable quantity.  When you use this module, several new
+classes are immediately available.  See the Derived Classes section of the
 documentation for a complete list
 
 The module Physics::Unit::ScalarSubtypes defines several classes that
@@ -30,8 +35,8 @@ module is still in an embryonic stage.
 SEE ALSO
 
 The perldoc documentation for each of the above modules for more
-information.  Also, there is perldoc for implementation notes in
-UnitImpl.pm and Unit/ScalarImpl.pm.
+information.  Implementation notes are in UnitImpl.pm and
+Unit/ScalarImpl.pm.
 
 The examples in the eg/ directory.
 

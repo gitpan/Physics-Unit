@@ -1,5 +1,39 @@
 Revision history for Perl extension Physics::Unit.
 
+0.03
+  - Took out "print 'Howdy!'" from Unit.pm:  ooops!  I had put that
+    in there to make sure that when developing, I was using the correct
+    copy of the module.
+  - Removed the example script MultiTypes.pl.  It didn't really do
+    anything unique.
+  - Simplified eg/UnitSimple.pl, and moved some of its test code into
+    t/unit.t.
+  - Created eg/UnitDebug.pl, which turns on debugging when given the
+    '-d' command-line option.  I took this feature out of UnitSimple.pl,
+    in order to make the latter as simple as possible.
+  - Similarly, I created eg/VectorDebug.pl, and simplified
+    eg/VectorSimple.pl.
+  - Ditto for eg/ScalarDebug.pl and eg/ScalarSimple.pl.
+  - Fixed eg/ScalarMethods.pl - changed "lb" to "lbm" in the mass.
+  - Added lots of tests to t/scalar.t:  everything that was in
+    eg/ScalarMethods.pl and eg/ScalarSimple.pl.
+  - I took all the test statements out of the examples:  things like
+    "die if ...".  This cleans up the examples.  Wherever it made sense,
+    I moved those tests into the test scripts, and converted them to use
+    the Test::More functions.
+  - Added an example of automagic determination of a scalar type to the
+    Scalar.pm documentation.
+  - I fixed the automatic generation of scalar type.  This example from
+    the Scalar.pm documentation:
+      $d = new Physics::Unit::Scalar('3m');
+    now correctly produces a Physics::Unit::Distance object.
+  - That resulted in the VectorSimple.pl example script working now.
+  - Changed the header of one of the sections in the Scalar.pm
+    documentation from "IMPLEMENTATION NOTES" to "UNITS ASSOCIATED
+    WITH SCALARS".
+  - Added UnitsByName.html and UnitsByType.html to the MANIFEST.  These
+    are generated automagically by the UnitGenDoc.pl example script.
+
 0.02
   - Added the prefixes "semi" and "demi", for 0.5.
   - Added the binary prefixes; see

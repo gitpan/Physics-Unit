@@ -1,34 +1,17 @@
-# %W%
 # This is a simple test program to list data from the Unit
-# module
-
-$debug = 1 if (@ARGV[0] eq '-d');
+# module.  This is similar to UnitGenPages.pl, but this prints in
+# text format to STDOUT, whereas that prints HTML format to two files.
 
 use Physics::Unit ':ALL';
 
 @units = ListUnits;
-print "Units:\n" if $debug;
+print "Units:\n";
 for $n (@units) {
     $u = GetUnit($n);
-    @name = $u->names;
-
-    NAME: for (@name) {
-        $matched = 1, last NAME if ($_ eq $n);
-    }
-
-    die "Huh?" if !$matched;
-    printf("%25s: %30s %35s %20s\n", $n, $u->def, $u->expanded, $u->type)
-        if $debug;
+    printf("%25s: %30s %35s %20s\n", $n, $u->def, $u->expanded, $u->type);
 }
 
 @types = ListTypes;
-print "Types are:\n" if $debug;
-print "  ", join ",\n  ", ListTypes() if $debug;
-print "\n\n" if $debug;
-
-for $t (@types) {
-    $u = GetTypeUnit($t);
-    die "Huh?" if ($u->type ne $t);
-}
-
-print "ok\n";
+print "Types are:\n";
+print "  ", join ",\n  ", ListTypes();
+print "\n\n";

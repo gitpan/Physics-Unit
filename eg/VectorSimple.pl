@@ -1,4 +1,6 @@
-BEGIN { $Physics::Unit::Vector::debug = 1; }
+BEGIN {
+    $Physics::Unit::Vector::debug = 1;
+}
 
 use Physics::Unit::Vector;
 

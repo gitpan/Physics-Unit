@@ -3,7 +3,7 @@ package Physics::Unit::Scalar;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.02';
+$VERSION = '0.03';
 use Physics::Unit ':ALL';
 
 # This is the actual content of a user defined unit.
@@ -23,6 +23,7 @@ InitSubtypes();
 
 sub new {
     my $proto = shift;
+    print "Scalar::new:  proto is $proto.\n" if $debug;
     my $class;
     my $self = {};
 
@@ -35,31 +36,43 @@ sub new {
         # Construct from a definition string
         # Get the definition string, and remove whitespace
         my $def = shift;
-        $def =~ s/^\s*(.*?)\s*$/$1/;
+        print "def is '$def'.\n" if $debug;
+        if (defined $def) {
+            $def =~ s/^\s*(.*?)\s*$/$1/;
+        }
 
         $class = $proto;
 
         # Convert the argument into a unit object
         if ($class eq 'Physics::Unit::Scalar') {
             # Build a generic Physics::Unit::Scalar object
-            my $u = Physics::Unit->new($def);
 
-            $self->{value} = $u->factor;
+            return ScalarFactory($def);
 
-            $u->factor(1);
-
-            $self->{MyUnit} = $self->{default_unit} = $u;
+            #my $u = Physics::Unit->new($def);
+            #$self->{value} = $u->factor;
+            #$u->factor(1);
+            #$self->{MyUnit} = $self->{default_unit} = $u;
         }
         else {
             # The user specified the type of Scalar explicitly
-            my $mu = $self->{MyUnit} = $self->{default_unit} = GetMyUnit($class);
+            my $mu = $self->{MyUnit} = $self->{default_unit} =
+                GetMyUnit($class);
 
-            # If the definition consists of just a number, then we'll use the
-            # default unit
+            # If no definition string was given, then set the value to
+            # one.
 
-            if ($def =~ /^$Physics::Unit::number_re$/io) {
+            if (!defined $def || $def eq '') {
+                $self->{value} = 1;
+            }
+
+            # If the definition consists of just a number, then we'll use
+            # the default unit
+
+            elsif ($def =~ /^$Physics::Unit::number_re$/io) {
                 $self->{value} = $def + 0;  # convert to number
             }
+
             else {
                 my $u = GetUnit($def);
 
@@ -329,7 +342,15 @@ Coincidentally (not really) the type of the Unit object is 'Distance'.
 
 Defining classes that correspond to physical quantity types allows us
 to overload the arithmetic methods to produce derived classes of the
-correct type automagically.
+correct type automagically.  For example:
+
+  $d = new Physics::Unit::Distance('98 mi');
+  $t = new Physics::Unit::Time('36 years');
+
+  # Compute a Speed = Distance / Time
+  # $speed will be of type Physics::Unit::Speed.
+
+  my $speed = $d->div($t);
 
 In general, when a new Physics::Unit::Scalar needs to be created as
 the result of some operation, this package attempts to determine its
@@ -392,7 +413,8 @@ also cause the creation of a file, Scalar_subtypes.pm, which defines
 all of the subclasses of Scalar, based on the Unit types.  The text
 of this file is evaled in order to define the subclasses.
 
-=head1 IMPLEMENTATION NOTES
+
+=head1 UNITS ASSOCIATED WITH SCALARS
 
 Classes and objects derived from Physics::Unit::Scalar follow these
 rules:
@@ -453,8 +475,9 @@ For example:
     # This creates an object of a derived class
     $d = new Physics::Unit::Distance('3 miles');
 
-    # This does the same thing, type is figured out automagically
-    $d = new Physics::Unit::Scalar('3 miles');   # $d is a Physics::Unit::Distance
+    # This does the same thing; the type is figured out automagically
+    # $d will be a Physics::Unit::Distance
+    $d = new Physics::Unit::Scalar('3 miles');
 
     # Use the default unit for the subtype (for Distance, it's meters):
     $d = new Physics::Unit::Distance(10);

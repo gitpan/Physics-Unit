@@ -2,7 +2,7 @@ package Physics::Unit::Acceleration;
 use strict;
 use Physics::Unit::Scalar;
 use vars qw( $VERSION @ISA $MyUnit );
-$VERSION = '0.02';
+$VERSION = '0.03';
 @ISA = qw( Physics::Unit::Scalar );
 
 $MyUnit = GetUnit('m/s^2');
