@@ -3,7 +3,7 @@ package Physics::Unit::Scalar;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.03';
+$VERSION = '0.04';
 use Physics::Unit ':ALL';
 
 # This is the actual content of a user defined unit.

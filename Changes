@@ -1,5 +1,11 @@
 Revision history for Perl extension Physics::Unit.
 
+0.04
+  - Changed several tests in unit.t to use RE matches instead of exact
+    numerical equality for floating point numbers.  This should fix the
+    failures that I got from some of the Perl testers on other
+    platforms.
+
 0.03
   - Took out "print 'Howdy!'" from Unit.pm:  ooops!  I had put that
     in there to make sure that when developing, I was using the correct

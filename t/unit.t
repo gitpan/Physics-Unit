@@ -17,7 +17,7 @@ $ss = new Physics::Unit('FuRlOnG / fOrTnIgHt', 'SiLlY_SpEeD');
 is($ss->name, 'silly_speed', 'silly_speed unit');
 
 my $mph = $ss->convert('mph');
-is($mph, 0.000372023809524, 'silly_speed to mph');
+like($mph, '/^0.0003720238095\d*$/', 'silly_speed to mph');
 
 
 
@@ -27,12 +27,12 @@ is($mph, 0.000372023809524, 'silly_speed to mph');
 $ss = new Physics::Unit('furlong / fortnight', 'ff');
 
 # test the expanded representation of a unit
-is($ss->expanded, '0.00016630952381 m s^-1', '$ss->expanded');
+like($ss->expanded, '/^0.0001663095238\d* m s\^-1$/', '$ss->expanded');
 
 #---------------------
 
 # Convert from one to another
-is($ss->convert('mph'), 0.000372023809524, '$ss->convert(mph)');
+like($ss->convert('mph'), '/^0.00037202380952\d*$/', '$ss->convert(mph)');
 
 # Get a Unit's conversion factor
 is(GetUnit('foot')->factor, 0.3048, 'GetUnit(foot)->factor');
@@ -68,7 +68,7 @@ is($beauty_rate->factor, 5 * 1e-100 / 3600, 'beauty_rate->factor');
 #---------------------
 
 InitUnit( ['chris', 'cfm'] => '3 piccolosarahs' );
-is(GetUnit('cfm')->expanded, '3.e-100 smw', 'not so beautiful');
+like(GetUnit('cfm')->expanded, '/^3\.?e-100 smw$/', 'not so beautiful');
 
 #---------------------
 

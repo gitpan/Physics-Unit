@@ -3,7 +3,7 @@ package Physics::Unit::Vector;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.03';
+$VERSION = '0.04';
 use Physics::Unit::Scalar;
 
 

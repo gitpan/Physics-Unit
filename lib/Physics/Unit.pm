@@ -26,7 +26,7 @@ my @export_ok_list = qw(
 
 %EXPORT_TAGS = ('ALL' => \@export_ok_list);
 @EXPORT_OK   = @export_ok_list;
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 # This is the regular expression used to parse out a number.  It
 # is here so that other modules can use it for convenience.
