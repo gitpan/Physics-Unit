@@ -1,0 +1,6 @@
+Revision history for Perl extension Physics::Unit.
+
+0.01  Thu Mar  6 13:23:15 2003
+	- original version; created by h2xs 1.22 with options
+		-X -n Physics::Unit
+
