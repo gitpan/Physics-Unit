@@ -1,0 +1,181 @@
+{
+   "abstract" : "Manipulate physics units and dimensions.",
+   "author" : [
+      "Christopher Maloney <dude@chrismaloney.com>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.4, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Physics-Unit",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.3601",
+            "Test::More" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "warnings" : "0"
+         }
+      }
+   },
+   "provides" : {
+      "Physics::Unit" : {
+         "file" : "lib/Physics/Unit.pm",
+         "version" : "0.04_01"
+      },
+      "Physics::Unit::Acceleration" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : "0.04_01"
+      },
+      "Physics::Unit::Area" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Capacitance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Charge" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Conductance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Current" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Data" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Dimensionless" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Distance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Dose" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Electric_potential" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Energy" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Force" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Frequency" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Inductance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Luminosity" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Magnetic_field" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Magnetic_flux" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Mass" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Money" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Power" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Pressure" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Resistance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Scalar" : {
+         "file" : "lib/Physics/Unit/Scalar.pm",
+         "version" : "0.04_01"
+      },
+      "Physics::Unit::Script" : {
+         "file" : "lib/Physics/Unit/Script.pm",
+         "version" : "0.04_01"
+      },
+      "Physics::Unit::Script::GenPages" : {
+         "file" : "lib/Physics/Unit/Script/GenPages.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Speed" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Substance" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Temperature" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Time" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      },
+      "Physics::Unit::Vector" : {
+         "file" : "lib/Physics/Unit/Vector.pm",
+         "version" : "0.04_01"
+      },
+      "Physics::Unit::Volume" : {
+         "file" : "lib/Physics/Unit/ScalarSubtypes.pm",
+         "version" : 0
+      }
+   },
+   "release_status" : "testing",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/Klortho/Physics-Unit/issues"
+      },
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ],
+      "repository" : {
+         "url" : "https://github.com/Klortho/Physics-Unit"
+      }
+   },
+   "version" : "0.04_01"
+}

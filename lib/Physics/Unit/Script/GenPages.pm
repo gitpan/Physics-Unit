@@ -1,16 +1,21 @@
+package Physics::Unit::Script::GenPages;
+
 # This test program generates the UnitsByName.html and
 # UnitsByType.html pages.
 
-use Physics::Unit ':ALL';
 use strict;
+use warnings;
 
-GenPages();
-print "ok\n";
+use Physics::Unit ':ALL';
 
+use parent 'Exporter';
+our @EXPORT = qw/GenPages/;
 
 #-----------------------------------------------------------
 sub GenPages
 {
+    my @return;
+
     # Define some constants:
 
     my $trailer = <<END_TRAILER;
@@ -26,8 +31,10 @@ END_TRAILER
     # Generate Units by Name
 
     $outFile = "UnitsByName.html";
+    push @return, $outFile;
+
     open NAMES, ">$outFile" or die "Can't open $outFile for output";
-    print "Generating $outFile\n";
+    #print "Generating $outFile\n";
 
     print NAMES header("Name");
     print NAMES tableHeader(1);
@@ -44,8 +51,10 @@ END_TRAILER
     # Generate Units by Type
 
     $outFile = "UnitsByType.html";
+    push @return, $outFile;
+
     open NAMES, ">$outFile" or die "Can't open $outFile for output";
-    print "Generating $outFile\n";
+    #print "Generating $outFile\n";
 
     print NAMES header("Type");
 
@@ -64,7 +73,7 @@ END_TRAILER
     for my $name (sort byType ListUnits())
     {
         my $n = GetUnit($name);
-        my $t = $n->type;
+        my $t = $n->type || '';
         if ($t ne $lastType) {
             print NAMES typeRow($t);
             $lastType = $t;
@@ -75,6 +84,8 @@ END_TRAILER
 
     print NAMES $trailer;
     close NAMES;
+
+    return @return;
 }
 
 #-----------------------------------------------------------
@@ -89,9 +100,6 @@ sub header
     <title>$title</title>
     <style type='text/css'>
       <!--
-        body {
-          background: url(bg.gif) #FBF1E9;
-        }
         th {
           color: white;
           font-size: larger;

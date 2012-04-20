@@ -3,11 +3,13 @@ package Physics::Unit::Scalar;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.04';
+$VERSION = '0.04_01';
+$VERSION = eval $VERSION;
+
 use Physics::Unit ':ALL';
 
 # This is the actual content of a user defined unit.
-my $subclass_template = q(
+my $subclass_template = <<'END_TEMPLATE';
 package Physics::Unit::%s;
 use strict;
 use base qw(Physics::Unit::Scalar);
@@ -16,7 +18,7 @@ use vars qw($MyUnit $DefaultUnit);
 $MyUnit = GetUnit('%s');
 $DefaultUnit = $MyUnit;
 1;
-);
+END_TEMPLATE
 
 # Call the InitSubtypes() function.
 InitSubtypes();
