@@ -3,7 +3,7 @@ package Physics::Unit::Scalar;
 use strict;
 use Carp;
 use vars qw($VERSION $debug);
-$VERSION = '0.04_01';
+$VERSION = '0.04_02';
 $VERSION = eval $VERSION;
 
 use Physics::Unit ':ALL';
@@ -235,10 +235,6 @@ sub GetScalar {
 }
 
 sub InitSubtypes {
-    my $file = 'ScalarSubtypes.pm';
-
-    open OUTFILE, ">$file" or croak "Can't write to $file - $!\n"
-         if $debug;
 
     for my $type (ListTypes()) {
         print "Creating class $type\n" if $debug;
@@ -247,14 +243,16 @@ sub InitSubtypes {
 
         my $type_unit_name = $prototype->name || $prototype->def;
 
-        my $s = sprintf $subclass_template, $type, $type_unit_name;
-        eval $s;
-        croak "Error creating class $type" if $@;
+        {
+            no strict 'refs';
+            no warnings 'once';
+            my $package = 'Physics::Unit::' . $type;
+            @{$package . '::ISA'} = qw(Physics::Unit::Scalar);
+            ${$package . '::DefaultUnit'} = ${$package . '::MyUnit'} = GetUnit( $type_unit_name );
+        }
 
-        print OUTFILE $s if ($debug);
     }
 
-    close OUTFILE if $debug;
 }
 
 sub MyUnit {
