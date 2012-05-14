@@ -3,18 +3,18 @@ package Physics::Unit::Script;
 use strict;
 use warnings;
 
-use Getopt::Long;
 use Physics::Unit ':ALL';
 use Physics::Unit::Script::GenPages;
 
-our $VERSION = '0.04_02';
+our $VERSION = '0.5';
 $VERSION = eval $VERSION;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/run_script getopt name_info/;
+our @EXPORT_OK = qw/run_script name_info/;
+
 
 sub run_script {
-  my $opts = getopt();
+  my $opts = shift;
 
   if ($opts->{export}) {
     my @files = GenPages();
@@ -34,18 +34,6 @@ sub run_script {
   }
 }
 
-sub getopt {
-  my %opts;
-
-  GetOptions(
-    types  => \$opts{types},
-    units  => \$opts{units},
-    export => \$opts{export},
-  );
-
-  return \%opts;
-}
-
 my %classes = (
   3 => 'Type',
   2 => 'Unit',
@@ -55,33 +43,27 @@ my %classes = (
 );
 
 sub name_info {
-  my $name = shift;
+    my $name = shift;
 
-  my $class = Physics::Unit::LookName($name);
-  my $string = '';
-  my $factor = '';
+    my $class = Physics::Unit::LookName($name);
+    print "Name:  $name\n";
 
-  if ($class == 1) {
-    $string = 'NA';
-    $factor = 'NA';
-  } elsif ($class == 3) {
-    $string = GetTypeUnit($name)->ToString;
-  } else {
-    my $unit = GetUnit($name);
-    if ($class == 0 and defined $unit) {
-      $class = -1;
+    my $u;
+    if ($class == 0) {
+        $u = GetUnit($name);
+        if (defined $u) { $class = -1; }
     }
-    my $type = GetTypeUnit($unit->type);
-    $string = $unit->ToString;
-    $factor = $unit->factor . " " . $type->ToString;
-  }
+    elsif ($class == 2) {
+        $u = GetUnit($name);
+    }
+    print "Class:  $classes{$class}\n";
 
-  print <<INFO;
-Name: $name
-Class: $classes{$class}
-Definition: $string
-Conversion: $factor
-INFO
+    if ($class == -1 || $class == 2) {
+        print "Type:  " . $u->type() . "\n" .
+              "Definition:  " . $u->def() . "\n" .
+              "Expanded:  " . $u->expanded() . "\n";
+    }
+    print "\n";
 }
 
 1;

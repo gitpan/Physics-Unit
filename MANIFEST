@@ -1,26 +1,19 @@
 bin/physics-unit
 Build.PL
 Changes
-eg/ScalarDebug.pl
 eg/ScalarMethods.pl
 eg/ScalarSimple.pl
-eg/UnitDebug.pl
 eg/UnitDocExamples.pl
 eg/UnitLists.pl
-eg/UnitSimple.pl
-eg/VectorDebug.pl
-eg/VectorSimple.pl
 lib/Physics/Unit.pm
 lib/Physics/Unit/Implementation.pod
 lib/Physics/Unit/Scalar.pm
 lib/Physics/Unit/Scalar/Implementation.pod
 lib/Physics/Unit/Script.pm
 lib/Physics/Unit/Script/GenPages.pm
-lib/Physics/Unit/Vector.pm
-MANIFEST			This list of files
+MANIFEST      This list of files
 META.json
 META.yml
 README
 t/scalar.t
 t/unit.t
-t/vector.t

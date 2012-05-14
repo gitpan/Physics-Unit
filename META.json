@@ -1,7 +1,7 @@
 {
    "abstract" : "Manipulate physics units and dimensions.",
    "author" : [
-      "Christopher Maloney <dude@chrismaloney.com>"
+      "Christopher Maloney <voldrani@gmail.com>"
    ],
    "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.4, CPAN::Meta::Converter version 2.120921",
@@ -34,26 +34,22 @@
    "provides" : {
       "Physics::Unit" : {
          "file" : "lib/Physics/Unit.pm",
-         "version" : "0.04_02"
+         "version" : "0.5"
       },
       "Physics::Unit::Scalar" : {
          "file" : "lib/Physics/Unit/Scalar.pm",
-         "version" : "0.04_02"
+         "version" : "0.5"
       },
       "Physics::Unit::Script" : {
          "file" : "lib/Physics/Unit/Script.pm",
-         "version" : "0.04_02"
+         "version" : "0.5"
       },
       "Physics::Unit::Script::GenPages" : {
          "file" : "lib/Physics/Unit/Script/GenPages.pm",
          "version" : 0
-      },
-      "Physics::Unit::Vector" : {
-         "file" : "lib/Physics/Unit/Vector.pm",
-         "version" : "0.04_02"
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/Klortho/Physics-Unit/issues"
@@ -65,5 +61,5 @@
          "url" : "https://github.com/Klortho/Physics-Unit"
       }
    },
-   "version" : "0.04_02"
+   "version" : "0.5"
 }
