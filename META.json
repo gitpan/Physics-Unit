@@ -34,15 +34,15 @@
    "provides" : {
       "Physics::Unit" : {
          "file" : "lib/Physics/Unit.pm",
-         "version" : "0.5"
+         "version" : "0.51"
       },
       "Physics::Unit::Scalar" : {
          "file" : "lib/Physics/Unit/Scalar.pm",
-         "version" : "0.5"
+         "version" : "0.51"
       },
       "Physics::Unit::Script" : {
          "file" : "lib/Physics/Unit/Script.pm",
-         "version" : "0.5"
+         "version" : "0.51"
       },
       "Physics::Unit::Script::GenPages" : {
          "file" : "lib/Physics/Unit/Script/GenPages.pm",
@@ -61,5 +61,5 @@
          "url" : "https://github.com/Klortho/Physics-Unit"
       }
    },
-   "version" : "0.5"
+   "version" : "0.51"
 }
