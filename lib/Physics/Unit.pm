@@ -11,7 +11,7 @@ use vars qw(
     $number_re
 );
 
-$VERSION = '0.51';
+$VERSION = '0.52';
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
@@ -1212,7 +1212,7 @@ This page.
 Describes the Scalar class and all of the type-specific classes
 that derive from Scalar.
 
-=item L<physics_unit>
+=item L<physics-unit>
 
 Describes the command-line utility that is included with this module.
 

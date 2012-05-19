@@ -6,7 +6,7 @@ use warnings;
 use Physics::Unit ':ALL';
 use Physics::Unit::Script::GenPages;
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 $VERSION = eval $VERSION;
 
 use base 'Exporter';
@@ -67,5 +67,3 @@ sub name_info {
 }
 
 1;
-
-
